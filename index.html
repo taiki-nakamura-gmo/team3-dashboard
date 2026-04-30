@@ -640,8 +640,10 @@ function closeModal(){document.getElementById("task-modal").classList.remove("op
 function saveTaskForm(){
   const name=document.getElementById("fn").value.trim();
   if(!name){const el=document.getElementById("fn");el.style.borderColor="var(--red)";el.focus();setTimeout(()=>el.style.borderColor="",1500);return;}
+  const assignee=document.getElementById("fa").value;
+  if(!assignee){const el=document.getElementById("fa").closest(".sel-w").querySelector("select");el.style.borderColor="var(--red)";el.focus();setTimeout(()=>el.style.borderColor="",1500);return;}
   const eid=document.getElementById("eid").value;
-  const data={name,memo:document.getElementById("fm").value.trim(),cat:document.getElementById("fc").value,priority:document.getElementById("fp").value,due:document.getElementById("fd").value,dueTime:document.getElementById("ft").value,assignee:document.getElementById("fa").value};
+  const data={name,memo:document.getElementById("fm").value.trim(),cat:document.getElementById("fc").value,priority:document.getElementById("fp").value,due:document.getElementById("fd").value,dueTime:document.getElementById("ft").value,assignee};
   if(eid){const t=tasks.find(t=>t.id==eid);if(t){Object.assign(t,data);saveTask(t);}}
   else saveTask({id:Date.now(),createdAt:Date.now(),...data});
   closeModal();
