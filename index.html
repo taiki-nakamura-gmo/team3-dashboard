@@ -683,7 +683,6 @@ document.addEventListener("keydown",e=>{
 
 function initFirebase(){
   _db=window._fb.db;_ref=window._fb.ref;_set=window._fb.set;_remove=window._fb.remove;_onValue=window._fb.onValue;
-  window.saveTask=function(t){fbSet("team3/tasks/"+t.id,t);};
   _onValue(_ref(_db,"team3/tasks"),snap=>{const val=snap.val();tasks=val?Object.values(val):[];refresh();});
   _onValue(_ref(_db,"team3/trash"),snap=>{const val=snap.val();trash=val?Object.values(val):[];refresh();});
   _onValue(_ref(_db,"team3/cats"),snap=>{
