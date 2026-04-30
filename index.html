@@ -457,16 +457,19 @@ let showTrash=false;
 let colSort={a:"created",b:"created",c:"created",d:"created",e:"created",f:"created",g:"created"};
 let _db,_ref,_set,_remove,_onValue;
 
-function fbSet(p,v){if(_db)_set(_ref(_db,p),v);}
+const _pendingTasks=new Map(); // Firebase未確定のローカルタスクを保持
+function fbSet(p,v){if(_db)return _set(_ref(_db,p),v);return Promise.resolve();}
 function fbDel(p){if(_db)_remove(_ref(_db,p));}
 function saveTask(t){
-  // Optimistic local update: reflect change immediately in UI
+  // ローカルに即時反映 + 保留リストへ登録
   const idx=tasks.findIndex(x=>x.id===t.id);
   if(idx>=0)tasks[idx]=t; else tasks.push(t);
+  _pendingTasks.set(t.id,t);
   refresh();
-  fbSet("team3/tasks/"+t.id,t);
+  // Firebase書き込み → 確定後に保留リストから削除
+  fbSet("team3/tasks/"+t.id,t).then(()=>{_pendingTasks.delete(t.id);}).catch(()=>{_pendingTasks.delete(t.id);});
 }
-function delTask(id){fbDel("team3/tasks/"+id);}
+function delTask(id){_pendingTasks.delete(id);fbDel("team3/tasks/"+id);}
 function saveTrash(t){fbSet("team3/trash/"+t.id,t);}
 function delTrash(id){fbDel("team3/trash/"+id);}
 
@@ -683,7 +686,14 @@ document.addEventListener("keydown",e=>{
 
 function initFirebase(){
   _db=window._fb.db;_ref=window._fb.ref;_set=window._fb.set;_remove=window._fb.remove;_onValue=window._fb.onValue;
-  _onValue(_ref(_db,"team3/tasks"),snap=>{const val=snap.val();tasks=val?Object.values(val):[];refresh();});
+  _onValue(_ref(_db,"team3/tasks"),snap=>{
+    const val=snap.val();
+    const fbTasks=val?Object.values(val):[];
+    // Firebase未確定のローカルタスクを消さないようにマージ
+    const fbIds=new Set(fbTasks.map(t=>String(t.id)));
+    tasks=fbTasks.concat([..._pendingTasks.values()].filter(t=>!fbIds.has(String(t.id))));
+    refresh();
+  });
   _onValue(_ref(_db,"team3/trash"),snap=>{const val=snap.val();trash=val?Object.values(val):[];refresh();});
   _onValue(_ref(_db,"team3/cats"),snap=>{
     const val=snap.val();
@@ -696,10 +706,7 @@ function initFirebase(){
   });
   _onValue(_ref(_db,"team3/auth"),snap=>{
     const val=snap.val();if(val&&typeof val==="object")_authData=val;
-    if(!_authLoaded)_checkSession();
   });
-  // タイムアウト保険: 6秒後にまだ未完了ならログイン画面を表示
-  setTimeout(()=>{if(!_authLoaded){_authLoaded=true;const l=document.getElementById('loading');if(l)l.style.display='none';}},6000);
 }
 if(window._fbReady)initFirebase();
 else window.addEventListener("fb-ready",initFirebase);
@@ -708,7 +715,7 @@ else window.addEventListener("fb-ready",initFirebase);
 <script>
 // ===LOGIN SYSTEM===
 const LS_KEY='team3_auth_session';
-const SESSION_MS=7*24*60*60*1000;
+const SESSION_MS=2*24*60*60*1000; // 2日間
 let _authData={};
 let _lsUser=null;
 let _authLoaded=false;
@@ -813,6 +820,9 @@ document.getElementById('ls-lid').addEventListener('keydown',e=>{if(e.key==='Ent
 document.getElementById('ls-lpass').addEventListener('keydown',e=>{if(e.key==='Enter')lsSubmitLogin();});
 document.getElementById('ls-spass').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ls-spass2').focus();});
 document.getElementById('ls-spass2').addEventListener('keydown',e=>{if(e.key==='Enter')lsSubmitSetup();});
+
+// Firebaseを待たずにセッション確認→スピナー即時非表示
+_checkSession();
 </script>
 </body>
 </html>
