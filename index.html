@@ -742,11 +742,11 @@ function _checkSession(){
   const s=_getSession();
   const valid=s&&((Date.now()-s.loginTime)<SESSION_MS);
   if(valid){
+    _setSession(s.userId,s.loginId); // アクセスのたびにセッションを更新（2日間アクセスなしで期限切れ）
     document.getElementById('login-overlay').classList.add('hidden');
   }else if(s&&!valid){
     lsSelectUser(s.userId,true);
   }
-  // 有効セッションがない場合はログイン画面をそのまま表示（initial stateで既に表示済み）
   _authLoaded=true;
 }
 
