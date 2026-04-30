@@ -55,7 +55,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .dot{width:8px;height:8px;border-radius:50%}
 .num{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--text)}
 .sep{width:1px;height:16px;background:var(--border)}
-.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:14px 20px;align-items:start}
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:14px 20px;align-items:start}
 .col{background:var(--surface2);border-radius:var(--r16);overflow:hidden;border:1px solid var(--border)}
 .col-header{padding:13px 14px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid transparent}
 .col-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
@@ -142,7 +142,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 .lbrand-icon{width:46px;height:46px;background:var(--accent);border-radius:13px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:22px;margin-bottom:10px}
 .lbrand-name{font-size:19px;font-weight:700}
 .lbrand-sub{font-size:12px;color:var(--text3);margin-top:3px}
-.ugrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:4px}
+.ugrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:4px}
 .ubtn{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r12);padding:12px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .14s;font-family:var(--font);text-align:left;width:100%}
 .ubtn:hover{border-color:var(--accent);background:var(--accent-bg);transform:translateY(-2px);box-shadow:var(--shadow)}
 .ubtn .uav{width:32px;height:32px;border-radius:50%;font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -178,6 +178,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         <button class="ubtn" onclick="lsSelectUser('早川')"><div class="uav" style="background:#6B35C8">早</div><div><div class="ubtn-name">早川</div><div class="ubtn-sub">ログイン</div></div></button>
         <button class="ubtn" onclick="lsSelectUser('小田切')"><div class="uav" style="background:#A05C00">小</div><div><div class="ubtn-name">小田切</div><div class="ubtn-sub">ログイン</div></div></button>
         <button class="ubtn" onclick="lsSelectUser('早坂')"><div class="uav" style="background:#0E7490">坂</div><div><div class="ubtn-name">早坂</div><div class="ubtn-sub">ログイン</div></div></button>
+        <button class="ubtn" onclick="lsSelectUser('杉山')"><div class="uav" style="background:#BE185D">杉</div><div><div class="ubtn-name">杉山</div><div class="ubtn-sub">ログイン</div></div></button>
       </div>
     </div>
   </div>
@@ -240,9 +241,10 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
   <div class="stat"><span class="dot" style="background:#6B35C8"></span>早川 <span class="num" id="st4">0</span></div>
   <div class="stat"><span class="dot" style="background:#A05C00"></span>小田切 <span class="num" id="st5">0</span></div>
   <div class="stat"><span class="dot" style="background:#0E7490"></span>早坂 <span class="num" id="st6">0</span></div>
+  <div class="stat"><span class="dot" style="background:#BE185D"></span>杉山 <span class="num" id="st7">0</span></div>
   <div class="sep"></div>
-  <div class="stat"><span class="dot" style="background:var(--red)"></span>高優先度 <span class="num" id="st7">0</span></div>
-  <div class="stat"><span class="dot" style="background:var(--amber)"></span>今日期限 <span class="num" id="st8">0</span></div>
+  <div class="stat"><span class="dot" style="background:var(--red)"></span>高優先度 <span class="num" id="st8">0</span></div>
+  <div class="stat"><span class="dot" style="background:var(--amber)"></span>今日期限 <span class="num" id="st9">0</span></div>
 </div>
 
 <div id="main">
@@ -325,6 +327,19 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
       </div>
       <div class="col-body" id="cf"></div>
     </div>
+    <!-- 杉山 -->
+    <div class="col">
+      <div class="col-header" style="border-bottom:3px solid #BE185D;background:linear-gradient(135deg,#FCE7F3,#fff5fa)">
+        <div class="col-title"><div class="avatar" style="background:#BE185D">杉</div>杉山</div>
+        <span class="col-cnt" style="background:#fbcfe8;color:#BE185D" id="cg0">0</span>
+      </div>
+      <div class="sort-bar">
+        <button class="sort-btn active" onclick="setSort('g','created',this)">追加順</button>
+        <button class="sort-btn" onclick="setSort('g','priority',this)">優先度順</button>
+        <button class="sort-btn" onclick="setSort('g','due',this)">期限順</button>
+      </div>
+      <div class="col-body" id="cg"></div>
+    </div>
   </div>
 </div>
 
@@ -348,6 +363,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
         <option value="早川">早川</option>
         <option value="小田切">小田切</option>
         <option value="早坂">早坂</option>
+        <option value="杉山">杉山</option>
       </select></div></div>
       <div class="form-row" style="margin:0"><label class="lbl">期限日</label><input type="date" class="inp" id="fd"></div>
     </div>
@@ -424,6 +440,7 @@ const MEMBERS=[
   {name:'早川',  key:'d', color:'#6B35C8', ch:'早'},
   {name:'小田切',key:'e', color:'#A05C00', ch:'小'},
   {name:'早坂',  key:'f', color:'#0E7490', ch:'坂'},
+  {name:'杉山',  key:'g', color:'#BE185D', ch:'杉'},
 ];
 
 let tasks=[],trash=[],cats=[
@@ -437,12 +454,18 @@ let tasks=[],trash=[],cats=[
 ];
 let appCfg={accent:"#3A5EE5"};
 let showTrash=false;
-let colSort={a:"created",b:"created",c:"created",d:"created",e:"created",f:"created"};
+let colSort={a:"created",b:"created",c:"created",d:"created",e:"created",f:"created",g:"created"};
 let _db,_ref,_set,_remove,_onValue;
 
 function fbSet(p,v){if(_db)_set(_ref(_db,p),v);}
 function fbDel(p){if(_db)_remove(_ref(_db,p));}
-function saveTask(t){fbSet("team3/tasks/"+t.id,t);}
+function saveTask(t){
+  // Optimistic local update: reflect change immediately in UI
+  const idx=tasks.findIndex(x=>x.id===t.id);
+  if(idx>=0)tasks[idx]=t; else tasks.push(t);
+  refresh();
+  fbSet("team3/tasks/"+t.id,t);
+}
 function delTask(id){fbDel("team3/tasks/"+id);}
 function saveTrash(t){fbSet("team3/trash/"+t.id,t);}
 function delTrash(id){fbDel("team3/trash/"+id);}
@@ -462,8 +485,8 @@ function refresh(){updateStats();showTrash?renderTrash():renderKanban();}
 function updateStats(){
   document.getElementById("st0").textContent=tasks.length;
   MEMBERS.forEach((m,i)=>{document.getElementById("st"+(i+1)).textContent=tasks.filter(t=>t.assignee===m.name).length;});
-  document.getElementById("st7").textContent=tasks.filter(t=>t.priority==="high").length;
-  document.getElementById("st8").textContent=tasks.filter(t=>t.due&&t.due<=today()).length;
+  document.getElementById("st8").textContent=tasks.filter(t=>t.priority==="high").length;
+  document.getElementById("st9").textContent=tasks.filter(t=>t.due&&t.due<=today()).length;
   document.getElementById("tbtn").textContent=trash.length;
 }
 
@@ -474,6 +497,7 @@ const _colMap={
   d:{id:"cd",name:"早川",  cnt:"cd0"},
   e:{id:"ce",name:"小田切",cnt:"ce0"},
   f:{id:"cf",name:"早坂",  cnt:"cf0"},
+  g:{id:"cg",name:"杉山",  cnt:"cg0"},
 };
 
 function renderCol(colKey){
@@ -704,6 +728,7 @@ const _UC={
   '早川':  {bg:'#6B35C8',ch:'早'},
   '小田切':{bg:'#A05C00',ch:'小'},
   '早坂':  {bg:'#0E7490',ch:'坂'},
+  '杉山':  {bg:'#BE185D',ch:'杉'},
 };
 
 function _checkSession(){
