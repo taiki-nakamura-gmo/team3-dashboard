@@ -456,10 +456,19 @@ let appCfg={accent:"#3A5EE5"};
 let showTrash=false;
 let colSort={a:"created",b:"created",c:"created",d:"created",e:"created",f:"created",g:"created"};
 let _db,_ref,_set,_remove,_onValue;
+let _dbReady=false;
+const _writeQueue=[]; // Firebase接続前の書き込みを蓄積するキュー
 
 const _pendingTasks=new Map(); // Firebase未確定のローカルタスクを保持
-function fbSet(p,v){if(_db)return _set(_ref(_db,p),v);return Promise.resolve();}
-function fbDel(p){if(_db)_remove(_ref(_db,p));}
+function fbSet(p,v){
+  if(_dbReady)return _set(_ref(_db,p),v);
+  // Firebase未接続の場合はキューに積む
+  return new Promise((res,rej)=>{_writeQueue.push({type:'set',p,v,res,rej});});
+}
+function fbDel(p){
+  if(_dbReady){_remove(_ref(_db,p));return;}
+  _writeQueue.push({type:'del',p});
+}
 function saveTask(t){
   // ローカルに即時反映 + 保留リストへ登録
   const idx=tasks.findIndex(x=>x.id===t.id);
@@ -688,6 +697,13 @@ document.addEventListener("keydown",e=>{
 
 function initFirebase(){
   _db=window._fb.db;_ref=window._fb.ref;_set=window._fb.set;_remove=window._fb.remove;_onValue=window._fb.onValue;
+  _dbReady=true;
+  // Firebase接続前にキューされた書き込みをまとめて実行
+  _writeQueue.forEach(({type,p,v,res,rej})=>{
+    if(type==='set')_set(_ref(_db,p),v).then(()=>res&&res()).catch(e=>rej&&rej(e));
+    else if(type==='del')_remove(_ref(_db,p));
+  });
+  _writeQueue.length=0;
   _onValue(_ref(_db,"team3/tasks"),snap=>{
     const val=snap.val();
     const fbTasks=val?Object.values(val):[];
