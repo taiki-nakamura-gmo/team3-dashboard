@@ -163,7 +163,7 @@ textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 <body>
 
 <!-- Login Screen -->
-<div class="login-overlay hidden" id="login-overlay">
+<div class="login-overlay" id="login-overlay">
   <div id="ls-step1">
     <div class="lcard">
       <div class="lbrand">
@@ -670,12 +670,13 @@ function initFirebase(){
   });
   _onValue(_ref(_db,"team3/cfg"),snap=>{
     const val=snap.val();if(val)appCfg=Object.assign(appCfg,val);applyAccent();
-    _cfgLoaded=true;_tryHideLoading();
   });
   _onValue(_ref(_db,"team3/auth"),snap=>{
     const val=snap.val();if(val&&typeof val==="object")_authData=val;
     if(!_authLoaded)_checkSession();
   });
+  // タイムアウト保険: 6秒後にまだ未完了ならログイン画面を表示
+  setTimeout(()=>{if(!_authLoaded){_authLoaded=true;const l=document.getElementById('loading');if(l)l.style.display='none';}},6000);
 }
 if(window._fbReady)initFirebase();
 else window.addEventListener("fb-ready",initFirebase);
@@ -687,7 +688,7 @@ const LS_KEY='team3_auth_session';
 const SESSION_MS=7*24*60*60*1000;
 let _authData={};
 let _lsUser=null;
-let _authLoaded=false,_cfgLoaded=false;
+let _authLoaded=false;
 
 async function _sha256(s){
   const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
@@ -695,7 +696,6 @@ async function _sha256(s){
 }
 function _getSession(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'null');}catch{return null;}}
 function _setSession(uid,lid){localStorage.setItem(LS_KEY,JSON.stringify({userId:uid,loginId:lid,loginTime:Date.now()}));}
-function _tryHideLoading(){if(_authLoaded&&_cfgLoaded){const l=document.getElementById('loading');if(l)l.style.display='none';}}
 
 const _UC={
   '鈴木':  {bg:'#3A5EE5',ch:'鈴'},
@@ -707,17 +707,16 @@ const _UC={
 };
 
 function _checkSession(){
+  const l=document.getElementById('loading');if(l)l.style.display='none';
   const s=_getSession();
   const valid=s&&((Date.now()-s.loginTime)<SESSION_MS);
   if(valid){
     document.getElementById('login-overlay').classList.add('hidden');
   }else if(s&&!valid){
-    document.getElementById('login-overlay').classList.remove('hidden');
     lsSelectUser(s.userId,true);
-  }else{
-    document.getElementById('login-overlay').classList.remove('hidden');
   }
-  _authLoaded=true;_tryHideLoading();
+  // 有効セッションがない場合はログイン画面をそのまま表示（initial stateで既に表示済み）
+  _authLoaded=true;
 }
 
 function lsSelectUser(uid,expired=false){
